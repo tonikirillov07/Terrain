@@ -12,7 +12,7 @@ public class GlobalRender {
     public void load(Model model){
         modelList.add(model);
 
-        Logs.makeInfoLog("Model " + model + " loaded");
+        Logs.makeInfoLog("Model " + model + " loaded successfully");
     }
 
     public void renderAll(){

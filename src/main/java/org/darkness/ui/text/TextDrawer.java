@@ -13,12 +13,16 @@ import org.lwjgl.util.vector.Vector3f;
 import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
 
 public class TextDrawer extends Model {
-    private final String text;
+    private String text;
     public TextDrawer(Vector3f position, Rotation rotation, Color color, int texture, float scale, String text) {
         super(position, rotation, color, texture, scale);
         this.text = text;
 
         setTexture(TexturesUtil.createTextureId(FONT_TEXTURE_DEFAULT_PATH, TexturesUtil.NEAREST));
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     @Override

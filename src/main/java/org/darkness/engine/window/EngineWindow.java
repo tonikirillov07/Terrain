@@ -5,20 +5,19 @@ import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
-import org.darkness.engine.utils.Utils;
 import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.text.TextDrawer;
+import org.darkness.world.Fog;
+import org.darkness.world.Lighting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
-
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
 import static org.darkness.engine.utils.textures.TexturesUtil.NO_TEXTURE;
 
@@ -28,6 +27,9 @@ public class EngineWindow extends Constants {
     private GlobalRender globalRender;
     private int texture;
     private Camera camera;
+    private TextDrawer text;
+    private Fog fog;
+    private Lighting lighting;
 
     public void create() {
         try {
@@ -42,10 +44,12 @@ public class EngineWindow extends Constants {
 
             Mouse.setGrabbed(true);
 
-            initGLContext();
-
             globalRender = new GlobalRender();
-            camera = new Camera(new Vector3f(-4.4356723f, -2.4447231f, -3.951839f), new Vector3f(0, 0, 0));
+            camera = new Camera(new Vector3f(-8.95068f, -2.4447231f, -12.380178f), new Vector3f(0, 0, 0));
+            fog = new Fog();
+            lighting = new Lighting();
+            fog.init();
+            lighting.init();
 
             int dirtTexture = TexturesUtil.createTextureId("/textures/dirt.png", TexturesUtil.LINEAR);
             int grassTexture = TexturesUtil.createTextureId("/textures/grass.png", TexturesUtil.LINEAR);
@@ -59,8 +63,10 @@ public class EngineWindow extends Constants {
                 }
             }
 
-            globalRender.load(new TextDrawer(new Vector3f(0, 2.5324621f, 0), new Rotation(-90, 0, 0, 1), new Color(255, 255, 255), NO_TEXTURE, 0.5f, "Hello!"));
+            text = new TextDrawer(new Vector3f(0, 2.5324621f, 0), new Rotation(-90, 0, 0, 1), new Color(255, 255, 255), NO_TEXTURE, 0.5f, "FPS: 0");
+            globalRender.load(text);
 
+            initGLContext();
             initLoop();
         } catch (Exception e) {
             Logs.makeErrorLog(e);
@@ -77,9 +83,7 @@ public class EngineWindow extends Constants {
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glDepthFunc(GL11.GL_LEQUAL);
 
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_LIGHT0);
-            GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+            GL11.glEnable(GL13.GL_MULTISAMPLE);
 
             GL11.glLoadIdentity();
             GL11.glFrustum(-1, 1, -1, 1, 2, 6);
@@ -96,14 +100,15 @@ public class EngineWindow extends Constants {
             try {
                 float startTime = System.nanoTime();
 
-                if (Display.wasResized()) resizeWindow(Display.getWidth(), Display.getHeight());
-
                 GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
                 listenEspecialInput();
+                listenWindowEvents();
 
                 camera.control(deltaTime);
                 camera.update();
+
+                text.setText("FPS:" + Math.round(getFps()));
 
                 globalRender.renderAll();
 
@@ -122,9 +127,15 @@ public class EngineWindow extends Constants {
         destroy();
     }
 
+    private void listenWindowEvents() {
+        if (Display.wasResized()) resizeWindow(Display.getWidth(), Display.getHeight());
+        if(Display.isCloseRequested()) destroy();
+    }
+
     private void listenEspecialInput() {
         if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) destroy();
         if(Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.println(camera.getPosition());
+        if(Keyboard.isKeyDown(Keyboard.KEY_R)) camera.resetTransform();
     }
 
     private void destroy() {
