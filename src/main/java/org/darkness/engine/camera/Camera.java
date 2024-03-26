@@ -13,6 +13,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
 
+import java.util.Random;
+
 public class Camera {
     private final Vector3f position, startPosition, rotation;
     private Rotation rotationX, rotationY;
@@ -20,6 +22,7 @@ public class Camera {
     private final Vector3f directionForward;
     private boolean isMoving = false;
     private final Footsteps footsteps;
+    private float deltaTime = 0;
 
     public Camera(Vector3f position, @NotNull Vector3f rotation) {
         this.position = position;
@@ -31,6 +34,41 @@ public class Camera {
 
         rotationX = new Rotation(rotation.getX(), 1, 0, 0);
         rotationY = new Rotation(rotation.getY(), 0, 1, 0);
+
+        initCameraShaking();
+    }
+
+    private void initCameraShaking() {
+        new Thread(() -> {
+            while(true) {
+                for (double i = -Constants.CAMERA_SHAKE_VALUES_LIMIT; i < Constants.CAMERA_SHAKE_VALUES_LIMIT; i += 0.1) {
+                    shakeCamera(i);
+
+                    try {
+                        Thread.sleep(30);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                for (double i = Constants.CAMERA_SHAKE_VALUES_LIMIT; i > -Constants.CAMERA_SHAKE_VALUES_LIMIT; i -= 0.1) {
+                    shakeCamera(i);
+
+                    try {
+                        Thread.sleep(30);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private void shakeCamera(double angle){
+        if(!isMoving()) {
+            rotationX = new Rotation((float) (rotationX.angle() + (Math.sin(angle * deltaTime))), 1, 0, 0);
+            rotationY = new Rotation((float) (rotationY.angle() + (Math.sin(angle * deltaTime))), 0, 1, 0);
+        }
     }
 
     public void update(){
@@ -44,6 +82,7 @@ public class Camera {
 
             GL11.glTranslatef(position.getX(), position.getY(), position.getZ());
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
+            GL11.glLoadIdentity();
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
@@ -51,6 +90,8 @@ public class Camera {
 
     public void control(float deltaTime){
         try {
+            this.deltaTime = deltaTime;
+
             angleX = (float) Math.toRadians(rotationX.angle());
             angleY = (float) Math.toRadians(rotationY.angle());
 

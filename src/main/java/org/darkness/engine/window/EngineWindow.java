@@ -5,6 +5,7 @@ import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
+import org.darkness.engine.utils.Utils;
 import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.text.TextDrawer;
@@ -19,13 +20,14 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
+import java.util.Objects;
+
 import static org.darkness.engine.utils.textures.TexturesUtil.NO_TEXTURE;
 
 public class EngineWindow extends Constants {
     private float fps;
     private float deltaTime;
     private GlobalRender globalRender;
-    private int texture;
     private Camera camera;
     private TextDrawer text;
     private Fog fog;
@@ -48,12 +50,12 @@ public class EngineWindow extends Constants {
             camera = new Camera(new Vector3f(-8.95068f, -2.4447231f, -12.380178f), new Vector3f(0, 0, 0));
             fog = new Fog();
             lighting = new Lighting();
-            fog.init();
+            //fog.init();
             lighting.init();
 
             int dirtTexture = TexturesUtil.createTextureId("/textures/dirt.png", TexturesUtil.LINEAR);
             int grassTexture = TexturesUtil.createTextureId("/textures/grass.png", TexturesUtil.LINEAR);
-            texture = TexturesUtil.createTextureId("/textures/target.png", TexturesUtil.LINEAR);
+            int texture = TexturesUtil.createTextureId("/textures/target.png", TexturesUtil.LINEAR);
 
             int currentTexture = dirtTexture;
             for (int i = 0; i < 20; i++) {
@@ -63,7 +65,7 @@ public class EngineWindow extends Constants {
                 }
             }
 
-            text = new TextDrawer(new Vector3f(0, 2.5324621f, 0), new Rotation(-90, 0, 0, 1), new Color(255, 255, 255), NO_TEXTURE, 0.5f, "FPS: 0");
+            text = new TextDrawer(new Vector3f(0, 2.5324621f, 0), new Rotation(-90, 0, 0, 1), new Color(255, 0, 0), NO_TEXTURE, 0.5f, "FPS: 0");
             globalRender.load(text);
 
             initGLContext();
@@ -105,12 +107,13 @@ public class EngineWindow extends Constants {
                 listenEspecialInput();
                 listenWindowEvents();
 
+                globalRender.renderAll();
+                lighting.doDayNightCycle(deltaTime);
+
                 camera.control(deltaTime);
                 camera.update();
 
                 text.setText("FPS:" + Math.round(getFps()));
-
-                globalRender.renderAll();
 
                 Display.update();
                 Display.sync(FPS);
@@ -118,7 +121,7 @@ public class EngineWindow extends Constants {
                 deltaTime = (System.nanoTime() - startTime) / 1_000_000_000f;
                 fps = 1 / deltaTime;
 
-                Display.setTitle(TITLE + " (FPS: " + Math.round(fps) + "). Position: " + camera.getPosition());
+                Display.setTitle(TITLE + " (FPS: " + Math.round(fps) + "). Position: " + camera.getPosition() + ". Light Angle: " + lighting.getCurrentLightAngle());
             }catch (Exception e) {
                 Logs.makeErrorLog(e);
             }
