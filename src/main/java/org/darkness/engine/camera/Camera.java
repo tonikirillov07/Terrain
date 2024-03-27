@@ -75,7 +75,7 @@ public class Camera {
         try {
             GL11.glMatrixMode(GL11.GL_PROJECTION);
             GL11.glLoadIdentity();
-            GLU.gluPerspective(70F, (float) Display.getWidth() / Display.getHeight(), 0.05f, 100f);
+            GLU.gluPerspective(70F, (float) Display.getWidth() / Display.getHeight(), 0.05f, Constants.Z_FAR);
 
             GL11.glRotatef(rotationX.angle(), 1, 0, 0);
             GL11.glRotatef(rotationY.angle(), 0, 1, 0);
@@ -97,7 +97,6 @@ public class Camera {
 
             rotate(deltaTime);
             move(deltaTime);
-            playStepsSounds(deltaTime);
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
@@ -114,6 +113,10 @@ public class Camera {
                             Keyboard.isKeyDown(Keyboard.KEY_Q) ? Constants.MOVE_UP : Keyboard.isKeyDown(Keyboard.KEY_E) ? Constants.MOVE_DOWN : Constants.DONT_MOVE;
 
             isMoving = moveType != Constants.DONT_MOVE;
+
+            if(isMoving){
+                if(moveType != Constants.MOVE_UP & moveType != Constants.MOVE_DOWN) playStepsSounds(deltaTime);
+            }
 
             switch (moveType) {
                 case Constants.MOVE_FORWARD -> moveForward(Constants.MOVE_FORWARD, deltaTime);
@@ -134,7 +137,11 @@ public class Camera {
     }
 
     private void moveLeft(byte direction, float deltaTime){
-        translate(new Vector3f((float) ((float) (direction == Constants.MOVE_LEFT ? 1: -1) * Math.cos(angleX) * deltaTime * Constants.DEFAULT_MOVE_SPEED), (float) 0, (float) ((float) (direction == Constants.MOVE_LEFT ? 1: -1) * Math.sin(angleY) * deltaTime * Constants.DEFAULT_MOVE_SPEED)));
+        float angle = rotationY.angle() + (90 * (direction == Constants.MOVE_LEFT ? -1: 1));
+        float speed = Constants.DEFAULT_MOVE_SPEED * deltaTime;
+
+        position.z += speed * (float) Math.cos(Math.toRadians(angle));
+        position.x -= speed * (float) Math.sin(Math.toRadians(angle));
     }
 
     private void moveForward(byte direction, float deltaTime){
@@ -188,6 +195,14 @@ public class Camera {
 
     public Vector3f getPosition() {
         return position;
+    }
+
+    public Rotation getRotationX() {
+        return rotationX;
+    }
+
+    public Rotation getRotationY() {
+        return rotationY;
     }
 
     public Vector3f getRotation() {

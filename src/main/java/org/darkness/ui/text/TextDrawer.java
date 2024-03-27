@@ -13,6 +13,7 @@ import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
+import static org.lwjgl.opengl.GL11.glNormal3f;
 
 public class TextDrawer extends Model {
     private String text;
@@ -43,6 +44,7 @@ public class TextDrawer extends Model {
             float bottom = textureRectangle.bottom();
 
             GL11.glBegin(GL11.GL_QUADS);
+            GL11.glNormal3f(0, 0, 1);
             GL11.glTexCoord2f(left,top);
             GL11.glVertex2f(0,0);
             GL11.glTexCoord2f(right, top);

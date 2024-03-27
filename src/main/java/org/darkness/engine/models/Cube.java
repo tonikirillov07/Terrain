@@ -1,13 +1,18 @@
 package org.darkness.engine.models;
 
+import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.utils.transform.Rotation;
+import org.jetbrains.annotations.NotNull;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class Cube extends Model{
+    private int i = 0;
+
     public Cube(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
         super(position, rotation, color, texture, scale);
     }
@@ -88,6 +93,20 @@ public class Cube extends Model{
             glEnd();
         }catch (Exception e) {
             Logs.makeErrorLog(e);
+        }
+    }
+
+    public void checkCamera(@NotNull Camera camera){
+        float cameraX = camera.getPosition().getX();
+        float cameraY = camera.getPosition().getY();
+        float cameraZ = camera.getPosition().getZ();
+
+        float x = getPosition().getX();
+        float y = getPosition().getY();
+        float z = getPosition().getZ();
+
+        if((cameraX >= x & cameraX <= x - getScale()) & (cameraZ >= z & cameraX <= z + getScale())){
+            System.out.println("Collision!");
         }
     }
 }

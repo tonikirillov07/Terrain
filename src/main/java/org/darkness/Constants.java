@@ -23,6 +23,7 @@ public abstract class Constants {
     public static final byte MOVE_UP = 3;
     public static final byte MOVE_DOWN = -3;
     public static final float DEFAULT_MOVE_SPEED = 7f;
+    public static final float Z_FAR = 1000;
     public static final float DEFAULT_MOUSE_SENSITIVITY = 5f;
     public static final String FONT_TEXTURE_DEFAULT_PATH = "/textures/font/Verdana.png";
     public static final double CAMERA_SHAKE_VALUES_LIMIT = Math.PI;

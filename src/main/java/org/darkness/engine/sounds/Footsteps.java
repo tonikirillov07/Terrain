@@ -18,7 +18,7 @@ public class Footsteps {
     }
 
     public void play(float deltaTime){
-        float footstepDelay = (Constants.DEFAULT_MOVE_SPEED * (2.4f + deltaTime)) / 100;
+        float footstepDelay = ((1 / Constants.DEFAULT_MOVE_SPEED) + deltaTime) * 2f;
 
         if(timer >= footstepDelay){
             try {

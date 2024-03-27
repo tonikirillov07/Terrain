@@ -5,22 +5,27 @@ import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
+import org.darkness.engine.models.Rectangle;
+import org.darkness.engine.sounds.ambience.BackgroundSounds;
 import org.darkness.engine.utils.Utils;
 import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.text.TextDrawer;
 import org.darkness.world.Fog;
 import org.darkness.world.Lighting;
+import org.darkness.world.Sun;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.Color;
+import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
 
-import java.util.Objects;
+import java.util.Random;
 
 import static org.darkness.engine.utils.textures.TexturesUtil.NO_TEXTURE;
 
@@ -32,6 +37,7 @@ public class EngineWindow extends Constants {
     private TextDrawer text;
     private Fog fog;
     private Lighting lighting;
+    private Sun sun;
 
     public void create() {
         try {
@@ -46,22 +52,21 @@ public class EngineWindow extends Constants {
 
             Mouse.setGrabbed(true);
 
-            globalRender = new GlobalRender();
             camera = new Camera(new Vector3f(-8.95068f, -2.4447231f, -12.380178f), new Vector3f(0, 0, 0));
+            globalRender = new GlobalRender(camera);
             fog = new Fog();
             lighting = new Lighting();
-            //fog.init();
+            sun = new Sun(camera, lighting);
             lighting.init();
+            new BackgroundSounds().start();
 
             int dirtTexture = TexturesUtil.createTextureId("/textures/dirt.png", TexturesUtil.LINEAR);
             int grassTexture = TexturesUtil.createTextureId("/textures/grass.png", TexturesUtil.LINEAR);
             int texture = TexturesUtil.createTextureId("/textures/target.png", TexturesUtil.LINEAR);
 
-            int currentTexture = dirtTexture;
             for (int i = 0; i < 20; i++) {
                 for (int j = 0; j < 20; j++) {
-                    currentTexture = currentTexture == dirtTexture ? grassTexture: dirtTexture;
-                    globalRender.load(new Cube(new Vector3f(i, 0, j), Rotation.IDENTITY, new Color(255, 255, 255), currentTexture, 1f));
+                    globalRender.load(new Cube(new Vector3f(i, 0, j), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? dirtTexture : grassTexture, 1f));
                 }
             }
 
@@ -88,7 +93,7 @@ public class EngineWindow extends Constants {
             GL11.glEnable(GL13.GL_MULTISAMPLE);
 
             GL11.glLoadIdentity();
-            GL11.glFrustum(-1, 1, -1, 1, 2, 6);
+            GL11.glFrustum(-1, 1, -1, 1, 2, Z_FAR);
 
             resizeWindow(Display.getWidth(), Display.getHeight());
             GL11.glTranslatef(0, 0, -2);
@@ -107,8 +112,13 @@ public class EngineWindow extends Constants {
                 listenEspecialInput();
                 listenWindowEvents();
 
-                globalRender.renderAll();
                 lighting.doDayNightCycle(deltaTime);
+
+                GL11.glClearColor(((float) SKY_COLOR.getRed() / 100) * lighting.getSkyColorCoefficient(), ((float) SKY_COLOR.getGreen() / 100) * lighting.getSkyColorCoefficient(),
+                        ((float) SKY_COLOR.getBlue() / 100) * lighting.getSkyColorCoefficient(), 1);
+
+                sun.update();
+                globalRender.renderAll();
 
                 camera.control(deltaTime);
                 camera.update();
@@ -121,7 +131,7 @@ public class EngineWindow extends Constants {
                 deltaTime = (System.nanoTime() - startTime) / 1_000_000_000f;
                 fps = 1 / deltaTime;
 
-                Display.setTitle(TITLE + " (FPS: " + Math.round(fps) + "). Position: " + camera.getPosition() + ". Light Angle: " + lighting.getCurrentLightAngle());
+                Display.setTitle(TITLE + " (FPS: " + Math.round(fps) + "). Position: " + camera.getPosition());
             }catch (Exception e) {
                 Logs.makeErrorLog(e);
             }
@@ -139,16 +149,23 @@ public class EngineWindow extends Constants {
         if(Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) destroy();
         if(Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.println(camera.getPosition());
         if(Keyboard.isKeyDown(Keyboard.KEY_R)) camera.resetTransform();
+        if(Keyboard.isKeyDown(Keyboard.KEY_F5)) Mouse.setGrabbed(!Mouse.isGrabbed());
+        if(Keyboard.isKeyDown(Keyboard.KEY_C)) camera.setPosition(new Vector3f(globalRender.getModelList().get(0).getPosition().x - globalRender.getModelList().get(0).getScale(), globalRender.getModelList().get(0).getPosition().y, globalRender.getModelList().get(0).getPosition().z));
+
+        if(Mouse.isButtonDown(0)){
+
+        }
     }
 
     private void destroy() {
         try {
             globalRender.clear();
 
+            AL.destroy();
             Keyboard.destroy();
             Mouse.destroy();
-
             Display.destroy();
+
             System.exit(0);
         }catch (Exception e) {
             Logs.makeErrorLog(e);
@@ -170,7 +187,7 @@ public class EngineWindow extends Constants {
             float size = 0.1f;
 
             GL11.glLoadIdentity();
-            GL11.glFrustum(-XToYRatio * size, XToYRatio * size, -size, size, size * 2, 100);
+            GL11.glFrustum(-XToYRatio * size, XToYRatio * size, -size, size, size * 2, Z_FAR);
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
