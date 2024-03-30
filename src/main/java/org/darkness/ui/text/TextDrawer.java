@@ -7,13 +7,11 @@ import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
-import static org.lwjgl.opengl.GL11.glNormal3f;
 
 public class TextDrawer extends Model {
     private String text;

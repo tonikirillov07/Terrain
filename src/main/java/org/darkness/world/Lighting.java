@@ -34,7 +34,7 @@ public class Lighting extends Constants {
         GL11.glLightModel(GL11.GL_LIGHT_MODEL_AMBIENT, Objects.requireNonNull(Utils.createFloatBuffer(new float[]{color, color, color, 1})));
         GL11.glPopMatrix();
 
-        currentLightAngle += deltaTime * 20;
+        currentLightAngle += deltaTime;
         if(currentLightAngle > 180) currentLightAngle -= 360;
     }
 

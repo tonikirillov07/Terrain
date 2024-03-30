@@ -1,11 +1,16 @@
 package org.darkness.engine.models;
 
+import org.darkness.Constants;
+import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
+
+import java.io.File;
 
 public abstract class Model{
     private Vector3f position;
@@ -13,6 +18,8 @@ public abstract class Model{
     private Color color;
     private int texture;
     private float scale;
+    private long id;
+    private File[] stepSounds;
 
     public Model(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
         this.position = position;
@@ -20,6 +27,15 @@ public abstract class Model{
         this.color = color;
         this.texture = texture;
         this.scale = scale;
+    }
+
+    public Model(Vector3f position, Rotation rotation, Color color, int texture, float scale, File[] stepSounds) {
+        this.position = position;
+        this.rotation = rotation;
+        this.color = color;
+        this.texture = texture;
+        this.scale = scale;
+        this.stepSounds = stepSounds;
     }
 
     public float getScale() {
@@ -48,6 +64,14 @@ public abstract class Model{
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public void setPosition(Vector3f position) {
@@ -90,6 +114,53 @@ public abstract class Model{
         setRotation(Rotation.IDENTITY);
     }
 
+    public File[] getStepSounds() {
+        return stepSounds;
+    }
+
+    public boolean checkForPlayerStandingOnModel(@NotNull Camera camera){
+        float x1 = -getPosition().getX();
+        float z1 = -getPosition().getZ();
+        float y1 = -getPosition().getY();
+
+        float x2 = x1 - scale;
+        float z2 = z1 - scale;
+        float y2 = y1 - scale;
+
+        float playerY = camera.getPosition().y - Constants.PLAYER_HEIGHT;
+
+        return ((camera.getPosition().x <= x1 & camera.getPosition().x >= x2) & (camera.getPosition().z <= z1 & camera.getPosition().z >= z2) & (playerY <= y1 & playerY >= y2));
+    }
+
+    public boolean checkForAnotherCollision(@NotNull Vector3f cameraPosition){
+        float x1 = -getPosition().getX();
+        float z1 = -getPosition().getZ();
+        float y1 = -getPosition().getY();
+
+        float x2 = (x1 - scale) - scale / 2;
+        float z2 = (z1 - scale) - scale / 2;
+        float y2 = (y1 - scale) - scale / 2;
+
+        float playerY = cameraPosition.y - Constants.PLAYER_HEIGHT;
+
+        return ((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) & ((playerY >= y1) & (playerY > y2 & cameraPosition.y < y2)));
+    }
+
+    public void tpCamera(Camera camera){
+        float x1 = -getPosition().getX();
+        float z1 = -getPosition().getZ();
+        float y1 = -getPosition().getY();
+
+        float x2 = (x1 - scale) - scale / 2;
+        float z2 = (z1 - scale) - scale / 2;
+        float y2 = (y1 - scale) - scale / 2;
+
+        float z3 = (z2 - scale) + scale / 2;
+        float x3 = (x2 - scale) + scale / 2;
+
+        camera.setPosition(new Vector3f(x3, 0, z3));
+    }
+
     public void render(){
         try {
             applyColor();
@@ -107,6 +178,7 @@ public abstract class Model{
                 ", rotation=" + rotation +
                 ", color=" + color +
                 ", texture=" + texture +
+                ", id=" + id +
                 '}';
     }
 }

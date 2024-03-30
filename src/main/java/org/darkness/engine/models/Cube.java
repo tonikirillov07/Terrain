@@ -8,13 +8,18 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
+import java.io.File;
+import java.util.Arrays;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public class Cube extends Model{
-    private int i = 0;
-
     public Cube(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
         super(position, rotation, color, texture, scale);
+    }
+
+    public Cube(Vector3f position, Rotation rotation, Color color, int texture, float scale, File[] stepSounds) {
+        super(position, rotation, color, texture, scale, stepSounds);
     }
 
     @Override

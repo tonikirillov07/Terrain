@@ -19,7 +19,7 @@ public class Sun {
             GL11.glPushMatrix();
             GL11.glRotatef(camera.getRotation().getX(), 1, 0, 0);
             GL11.glRotatef(camera.getRotation().getY(), 0, 1, 0);
-            GL11.glRotatef(lighting.getCurrentLightAngle(), 1, 0, 0);
+            GL11.glRotatef(-lighting.getCurrentLightAngle() * 2, 1, 0, 0);
             GL11.glTranslatef(0, 0, 100);
 
             GL11.glDisable(GL11.GL_TEXTURE_2D);

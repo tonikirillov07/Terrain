@@ -10,6 +10,6 @@ public class BackgroundSounds {
     }
 
     public void start(){
-        soundPlayer.play();
+        soundPlayer.getSound().loop();
     }
 }

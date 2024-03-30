@@ -5,14 +5,14 @@ import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
-import org.darkness.engine.models.Rectangle;
+import org.darkness.engine.sounds.SoundsConstants;
 import org.darkness.engine.sounds.ambience.BackgroundSounds;
-import org.darkness.engine.utils.Utils;
-import org.darkness.engine.utils.textures.TexturesUtil;
+import org.darkness.engine.utils.textures.TexturesConstants;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.text.TextDrawer;
 import org.darkness.world.Fog;
 import org.darkness.world.Lighting;
+import org.darkness.world.SimplexNoise;
 import org.darkness.world.Sun;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -22,7 +22,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.Color;
-import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.Random;
@@ -35,7 +34,6 @@ public class EngineWindow extends Constants {
     private GlobalRender globalRender;
     private Camera camera;
     private TextDrawer text;
-    private Fog fog;
     private Lighting lighting;
     private Sun sun;
 
@@ -52,25 +50,29 @@ public class EngineWindow extends Constants {
 
             Mouse.setGrabbed(true);
 
-            camera = new Camera(new Vector3f(-8.95068f, -2.4447231f, -12.380178f), new Vector3f(0, 0, 0));
-            globalRender = new GlobalRender(camera);
-            fog = new Fog();
+            globalRender = new GlobalRender();
+            camera = new Camera(Camera.getRandomPosition(WORLD_SIZE[0], WORLD_SIZE[1]), new Vector3f(0, 0, 0), globalRender.getModelList());
+            Fog fog = new Fog();
             lighting = new Lighting();
             sun = new Sun(camera, lighting);
             lighting.init();
             new BackgroundSounds().start();
 
-            int dirtTexture = TexturesUtil.createTextureId("/textures/dirt.png", TexturesUtil.LINEAR);
-            int grassTexture = TexturesUtil.createTextureId("/textures/grass.png", TexturesUtil.LINEAR);
-            int texture = TexturesUtil.createTextureId("/textures/target.png", TexturesUtil.LINEAR);
+            for (int i = 0; i < WORLD_SIZE[0]; i++) {
+                for (int j = 0; j < WORLD_SIZE[1]; j++) {
+                    for (int k = 0; k < 2; k++) {
+                        int randomTexture = new Random().nextInt(1, 4);
+                        int currentTexture =  randomTexture == 1 ? TexturesConstants.DIRT_TEXTURE : randomTexture == 2 ? TexturesConstants.STONE_TEXTURE: TexturesConstants.GRASS_TEXTURE;
 
-            for (int i = 0; i < 20; i++) {
-                for (int j = 0; j < 20; j++) {
-                    globalRender.load(new Cube(new Vector3f(i, 0, j), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? dirtTexture : grassTexture, 1f));
+                        globalRender.load(new Cube(new Vector3f(i, k , j), Rotation.IDENTITY, new Color(255, 255, 255), currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
+                    }
                 }
             }
 
-            text = new TextDrawer(new Vector3f(0, 2.5324621f, 0), new Rotation(-90, 0, 0, 1), new Color(255, 0, 0), NO_TEXTURE, 0.5f, "FPS: 0");
+            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 3, 2 , (float) WORLD_SIZE[1] / 3), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
+            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 2, 2 , (float) WORLD_SIZE[1] / 2), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
+
+            text = new TextDrawer(new Vector3f(0, 0, 0), new Rotation(0, 0, 0, 1), new Color(255, 0, 0), NO_TEXTURE, 0.5f, "FPS: 0");
             globalRender.load(text);
 
             initGLContext();
@@ -111,6 +113,7 @@ public class EngineWindow extends Constants {
 
                 listenEspecialInput();
                 listenWindowEvents();
+                if(Mouse.isGrabbed()) keepCursorInCenter();
 
                 lighting.doDayNightCycle(deltaTime);
 
@@ -119,9 +122,7 @@ public class EngineWindow extends Constants {
 
                 sun.update();
                 globalRender.renderAll();
-
-                camera.control(deltaTime);
-                camera.update();
+                updateCamera();
 
                 text.setText("FPS:" + Math.round(getFps()));
 
@@ -140,6 +141,20 @@ public class EngineWindow extends Constants {
         destroy();
     }
 
+    private void keepCursorInCenter(){
+        Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+    }
+
+    private void updateCamera() {
+        camera.control(deltaTime);
+        camera.update();
+
+        camera.checkIsOnGround(globalRender.getModelList());
+        camera.applyGravity();
+
+        if(camera.getPosition().y >= 22) camera.setPosition(Camera.getRandomPosition(WORLD_SIZE[0], WORLD_SIZE[1]));
+    }
+
     private void listenWindowEvents() {
         if (Display.wasResized()) resizeWindow(Display.getWidth(), Display.getHeight());
         if(Display.isCloseRequested()) destroy();
@@ -150,11 +165,7 @@ public class EngineWindow extends Constants {
         if(Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.println(camera.getPosition());
         if(Keyboard.isKeyDown(Keyboard.KEY_R)) camera.resetTransform();
         if(Keyboard.isKeyDown(Keyboard.KEY_F5)) Mouse.setGrabbed(!Mouse.isGrabbed());
-        if(Keyboard.isKeyDown(Keyboard.KEY_C)) camera.setPosition(new Vector3f(globalRender.getModelList().get(0).getPosition().x - globalRender.getModelList().get(0).getScale(), globalRender.getModelList().get(0).getPosition().y, globalRender.getModelList().get(0).getPosition().z));
-
-        if(Mouse.isButtonDown(0)){
-
-        }
+        if(Keyboard.isKeyDown(Keyboard.KEY_F6)) globalRender.getModelList().get(0).tpCamera(camera);
     }
 
     private void destroy() {
@@ -183,11 +194,11 @@ public class EngineWindow extends Constants {
     private void resizeWindow(int width, int height){
         try {
             GL11.glViewport(0, 0, width, height);
-            float XToYRatio = (float) width / height;
+            float xToYRatio = (float) width / height;
             float size = 0.1f;
 
             GL11.glLoadIdentity();
-            GL11.glFrustum(-XToYRatio * size, XToYRatio * size, -size, size, size * 2, Z_FAR);
+            GL11.glFrustum(-xToYRatio * size, xToYRatio * size, -size, size, size * 2, Z_FAR);
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }

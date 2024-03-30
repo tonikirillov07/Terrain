@@ -8,8 +8,6 @@ public abstract class Logs {
     private static final Logger LOGGER = Logger.getLogger(Logs.class.getName());
 
     public static void makeErrorLog(@NotNull Exception e){
-        e.printStackTrace();
-
         LOGGER.severe(e.toString());
     }
 
