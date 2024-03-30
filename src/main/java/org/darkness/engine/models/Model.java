@@ -137,13 +137,16 @@ public abstract class Model{
         float z1 = -getPosition().getZ();
         float y1 = -getPosition().getY();
 
-        float x2 = (x1 - scale) - scale / 2;
-        float z2 = (z1 - scale) - scale / 2;
-        float y2 = (y1 - scale) - scale / 2;
+        float halfScale = scale / 2;
+
+        float x2 = (x1 - scale) - halfScale;
+        float z2 = (z1 - scale) - halfScale;
+        float y2 = (y1 - scale) - halfScale;
 
         float playerY = cameraPosition.y - Constants.PLAYER_HEIGHT;
 
-        return ((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) & ((playerY >= y1) & (playerY > y2 & cameraPosition.y < y2)));
+        return (((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) |
+                (cameraPosition.x - halfScale <= x1 & cameraPosition.x - halfScale >= x2) & (cameraPosition.z - halfScale <= z1 & cameraPosition.z >= z2)) & ((playerY >= y1) & ((playerY > y2 & cameraPosition.y < y2) | (cameraPosition.y <= y1 & cameraPosition.y >= y2))));
     }
 
     public void tpCamera(Camera camera){

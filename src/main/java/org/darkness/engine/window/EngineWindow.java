@@ -60,12 +60,11 @@ public class EngineWindow extends Constants {
 
             for (int i = 0; i < WORLD_SIZE[0]; i++) {
                 for (int j = 0; j < WORLD_SIZE[1]; j++) {
-                    for (int k = 0; k < 2; k++) {
-                        int randomTexture = new Random().nextInt(1, 4);
-                        int currentTexture =  randomTexture == 1 ? TexturesConstants.DIRT_TEXTURE : randomTexture == 2 ? TexturesConstants.STONE_TEXTURE: TexturesConstants.GRASS_TEXTURE;
+                    int randomTexture = new Random().nextInt(1, 4);
+                    int currentTexture =  randomTexture == 1 ? TexturesConstants.DIRT_TEXTURE : randomTexture == 2 ? TexturesConstants.STONE_TEXTURE: TexturesConstants.GRASS_TEXTURE;
 
-                        globalRender.load(new Cube(new Vector3f(i, k , j), Rotation.IDENTITY, new Color(255, 255, 255), currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
-                    }
+                    globalRender.load(new Cube(new Vector3f(i, 0, j), Rotation.IDENTITY, new Color(255, 255, 255), currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
+
                 }
             }
 

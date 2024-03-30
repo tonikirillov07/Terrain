@@ -1,8 +1,8 @@
 package org.darkness.engine.camera;
 
 import org.darkness.Constants;
-import org.darkness.engine.GlobalRender;
 import org.darkness.engine.logs.Logs;
+import org.darkness.engine.models.Cube;
 import org.darkness.engine.models.Model;
 import org.darkness.engine.sounds.Footsteps;
 import org.darkness.engine.utils.transform.Directions;
@@ -17,7 +17,6 @@ import org.lwjgl.util.Color;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Vector3f;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -159,6 +158,9 @@ public class Camera {
                     for (Model allModel : allModels) {
                         aboolean = (allModel.checkForAnotherCollision(translatedVector));
                         if (aboolean) {
+                            //allModel.setColor(new Color(255, 0, 0));
+                            allModels.add(new Cube(new Vector3f(allModel.getPosition().x, allModel.getPosition().y + 1, allModel.getPosition().z), Rotation.IDENTITY, new Color(255, 255, 255), 0, 1f));
+
                             break;
                         }
                     }
