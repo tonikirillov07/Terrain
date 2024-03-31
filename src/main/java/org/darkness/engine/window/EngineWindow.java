@@ -11,6 +11,7 @@ import org.darkness.engine.sounds.ambience.BackgroundSounds;
 import org.darkness.engine.utils.Utils;
 import org.darkness.engine.utils.textures.TexturesConstants;
 import org.darkness.engine.utils.transform.Rotation;
+import org.darkness.ui.hud.Target;
 import org.darkness.ui.text.TextDrawer;
 import org.darkness.world.Fog;
 import org.darkness.world.Lighting;
@@ -35,6 +36,7 @@ public class EngineWindow extends Constants {
     private Camera camera;
     private TextDrawer fpsText, positionText;
     private Lighting lighting;
+    private Target target;
     private Sun sun;
 
     public void create() {
@@ -73,8 +75,10 @@ public class EngineWindow extends Constants {
 
             fpsText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 30, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "FPS: 0");
             positionText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 55, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "Position: 0");
+            target = new Target(new Vector3f(0,0,-2), Rotation.IDENTITY, WHITE_COLOR, NO_TEXTURE, 16);
             globalRender.load(fpsText);
             globalRender.load(positionText);
+            globalRender.load(target);
 
             initGLContext();
             initLoop();
@@ -168,7 +172,6 @@ public class EngineWindow extends Constants {
         if(Keyboard.isKeyDown(Keyboard.KEY_P)) System.out.println(camera.getPosition());
         if(Keyboard.isKeyDown(Keyboard.KEY_R)) camera.resetTransform();
         if(Keyboard.isKeyDown(Keyboard.KEY_F5)) Mouse.setGrabbed(!Mouse.isGrabbed());
-        if(Keyboard.isKeyDown(Keyboard.KEY_F6)) globalRender.getModelList().get(0).tpCamera(camera);
     }
 
     private void destroy() {

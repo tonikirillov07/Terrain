@@ -1,6 +1,5 @@
 package org.darkness.ui.text;
 
-import org.darkness.Constants;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Model;
 import org.darkness.engine.utils.textures.TextureRectangle;
@@ -8,12 +7,9 @@ import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
-
-import java.lang.constant.Constable;
 
 import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
 
@@ -23,6 +19,7 @@ public class TextDrawer extends Model {
         super(position, rotation, color, texture, scale);
         this.text = text;
 
+        setDetectCollision(false);
         setTexture(TexturesUtil.createTextureId(FONT_TEXTURE_DEFAULT_PATH, TexturesUtil.NEAREST));
     }
 
@@ -33,36 +30,31 @@ public class TextDrawer extends Model {
     @Override
     public void render() {
         super.render();
-        bindTexture();
 
-        GL11.glMatrixMode(GL11.GL_PROJECTION);
-        GL11.glLoadIdentity();
-        GL11.glOrtho((double) -Display.getWidth() / 2, (double) Display.getWidth() / 2, (double) -Display.getHeight() / 2, (double) Display.getHeight() / 2, 0.05f, Constants.Z_FAR);
+        renderUIElement(() -> {
+            for (int i = 0; i < text.length(); i++) {
+                TextureRectangle textureRectangle = calculateTextureRectangle(text.toCharArray()[i]);
 
-        for (int i = 0; i < text.length(); i++) {
-            TextureRectangle textureRectangle = calculateTextureRectangle(text.toCharArray()[i]);
+                float left = textureRectangle.left();
+                float right = textureRectangle.right();
+                float top = textureRectangle.top();
+                float bottom = textureRectangle.bottom();
 
-            float left = textureRectangle.left();
-            float right = textureRectangle.right();
-            float top = textureRectangle.top();
-            float bottom = textureRectangle.bottom();
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glNormal3f(0, 0, 1);
+                GL11.glTexCoord2f(left,top);
+                GL11.glVertex2f(0,0);
+                GL11.glTexCoord2f(right, top);
+                GL11.glVertex2f(0, getScale());
+                GL11.glTexCoord2f(right,bottom);
+                GL11.glVertex2f(getScale(), getScale());
+                GL11.glTexCoord2f(left, bottom);
+                GL11.glVertex2f(getScale(), 0);
+                GL11.glEnd();
 
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glNormal3f(0, 0, 1);
-            GL11.glTexCoord2f(left,top);
-            GL11.glVertex2f(0,0);
-            GL11.glTexCoord2f(right, top);
-            GL11.glVertex2f(0, getScale());
-            GL11.glTexCoord2f(right,bottom);
-            GL11.glVertex2f(getScale(), getScale());
-            GL11.glTexCoord2f(left, bottom);
-            GL11.glVertex2f(getScale(), 0);
-            GL11.glEnd();
-
-            GL11.glTranslatef(getScale(), 0, 0);
-        }
-
-        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+                GL11.glTranslatef(getScale(), 0, 0);
+            }
+        });
     }
 
     @Contract("_ -> new")

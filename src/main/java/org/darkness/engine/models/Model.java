@@ -3,9 +3,11 @@ package org.darkness.engine.models;
 import org.darkness.Constants;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
+import org.darkness.engine.utils.IOnAction;
 import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
@@ -160,21 +162,6 @@ public abstract class Model{
         return isCollisionFound & isDetectCollision();
     }
 
-    public void tpCamera(Camera camera){
-        float x1 = -getPosition().getX();
-        float z1 = -getPosition().getZ();
-        float y1 = -getPosition().getY();
-
-        float x2 = (x1 - scale) - scale / 2;
-        float z2 = (z1 - scale) - scale / 2;
-        float y2 = (y1 - scale) - scale / 2;
-
-        float z3 = (z2 - scale) + scale / 2;
-        float x3 = (x2 - scale) + scale / 2;
-
-        camera.setPosition(new Vector3f(x3, 0, z3));
-    }
-
     public void render(){
         try {
             applyColor();
@@ -183,6 +170,18 @@ public abstract class Model{
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
+    }
+
+    protected void renderUIElement(@NotNull IOnAction onAction){
+        bindTexture();
+
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+        GL11.glOrtho((double) -Display.getWidth() / 2, (double) Display.getWidth() / 2, (double) -Display.getHeight() / 2, (double) Display.getHeight() / 2, 0.05f, Constants.Z_FAR);
+
+        onAction.onAction();
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
     }
 
     @Override
