@@ -1,5 +1,6 @@
 package org.darkness.ui.text;
 
+import org.darkness.Constants;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Model;
 import org.darkness.engine.utils.textures.TextureRectangle;
@@ -7,9 +8,12 @@ import org.darkness.engine.utils.textures.TexturesUtil;
 import org.darkness.engine.utils.transform.Rotation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
+
+import java.lang.constant.Constable;
 
 import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
 
@@ -32,6 +36,8 @@ public class TextDrawer extends Model {
         bindTexture();
 
         GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+        GL11.glOrtho((double) -Display.getWidth() / 2, (double) Display.getWidth() / 2, (double) -Display.getHeight() / 2, (double) Display.getHeight() / 2, 0.05f, Constants.Z_FAR);
 
         for (int i = 0; i < text.length(); i++) {
             TextureRectangle textureRectangle = calculateTextureRectangle(text.toCharArray()[i]);

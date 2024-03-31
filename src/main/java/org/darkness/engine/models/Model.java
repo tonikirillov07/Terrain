@@ -19,6 +19,7 @@ public abstract class Model{
     private int texture;
     private float scale;
     private long id;
+    private boolean detectCollision = true;
     private File[] stepSounds;
 
     public Model(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
@@ -98,6 +99,14 @@ public abstract class Model{
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, getTexture());
     }
 
+    public boolean isDetectCollision() {
+        return detectCollision;
+    }
+
+    public void setDetectCollision(boolean detectCollision) {
+        this.detectCollision = detectCollision;
+    }
+
     public void applyTransform(){
         try {
             GL11.glLoadIdentity();
@@ -129,7 +138,8 @@ public abstract class Model{
 
         float playerY = camera.getPosition().y - Constants.PLAYER_HEIGHT;
 
-        return ((camera.getPosition().x <= x1 & camera.getPosition().x >= x2) & (camera.getPosition().z <= z1 & camera.getPosition().z >= z2) & (playerY <= y1 & playerY >= y2));
+        return ((camera.getPosition().x <= x1 & camera.getPosition().x >= x2) & (camera.getPosition().z <= z1 & camera.getPosition().z >= z2) & (playerY <= y1 & playerY >= y2))
+                & isDetectCollision();
     }
 
     public boolean checkForAnotherCollision(@NotNull Vector3f cameraPosition){
@@ -144,9 +154,10 @@ public abstract class Model{
         float y2 = (y1 - scale) - halfScale;
 
         float playerY = cameraPosition.y - Constants.PLAYER_HEIGHT;
-
-        return (((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) |
+        boolean isCollisionFound = (((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) |
                 (cameraPosition.x - halfScale <= x1 & cameraPosition.x - halfScale >= x2) & (cameraPosition.z - halfScale <= z1 & cameraPosition.z >= z2)) & ((playerY >= y1) & ((playerY > y2 & cameraPosition.y < y2) | (cameraPosition.y <= y1 & cameraPosition.y >= y2))));
+
+        return isCollisionFound & isDetectCollision();
     }
 
     public void tpCamera(Camera camera){

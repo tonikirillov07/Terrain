@@ -31,6 +31,8 @@ public abstract class Constants {
     public static final double CAMERA_SHAKE_VALUES_LIMIT = Math.PI;
     public static final float PLAYER_HEIGHT = -1.8f;
     public static final float ACCELERATION_OF_GRAVITY = 9.81f;
+    public static final Color WHITE_COLOR = new Color(255, 255, 255);
+    public static final Color GRAY_COLOR = new Color(128, 128, 128);
     public static final FloatBuffer LIGHT0_POSITION = Utils.createFloatBuffer(new float[]{0, 1, 0, 0});
     public static final String SKYBOX_BACK_TEXTURE_PATH = SKYBOX_TEXTURES_PATH + "skyboxBack.png";
     public static final String SKYBOX_DOWN_TEXTURE_PATH = SKYBOX_TEXTURES_PATH + "skyboxDown.png";

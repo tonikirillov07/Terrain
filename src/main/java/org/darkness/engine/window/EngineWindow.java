@@ -5,14 +5,15 @@ import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
+import org.darkness.engine.models.Rectangle;
 import org.darkness.engine.sounds.SoundsConstants;
 import org.darkness.engine.sounds.ambience.BackgroundSounds;
+import org.darkness.engine.utils.Utils;
 import org.darkness.engine.utils.textures.TexturesConstants;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.text.TextDrawer;
 import org.darkness.world.Fog;
 import org.darkness.world.Lighting;
-import org.darkness.world.SimplexNoise;
 import org.darkness.world.Sun;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -21,7 +22,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.Random;
@@ -33,7 +33,7 @@ public class EngineWindow extends Constants {
     private float deltaTime;
     private GlobalRender globalRender;
     private Camera camera;
-    private TextDrawer text;
+    private TextDrawer fpsText, positionText;
     private Lighting lighting;
     private Sun sun;
 
@@ -63,16 +63,18 @@ public class EngineWindow extends Constants {
                     int randomTexture = new Random().nextInt(1, 4);
                     int currentTexture =  randomTexture == 1 ? TexturesConstants.DIRT_TEXTURE : randomTexture == 2 ? TexturesConstants.STONE_TEXTURE: TexturesConstants.GRASS_TEXTURE;
 
-                    globalRender.load(new Cube(new Vector3f(i, 0, j), Rotation.IDENTITY, new Color(255, 255, 255), currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
+                    globalRender.load(new Rectangle(new Vector3f(i, 0, j), new Rotation(-90f, 1, 0, 0), WHITE_COLOR, currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
 
                 }
             }
 
-            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 3, 2 , (float) WORLD_SIZE[1] / 3), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
-            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 2, 2 , (float) WORLD_SIZE[1] / 2), Rotation.IDENTITY, new Color(255, 255, 255), new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
+            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 3, 2 , (float) WORLD_SIZE[1] / 3), Rotation.IDENTITY, WHITE_COLOR, new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
+            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 2, 2 , (float) WORLD_SIZE[1] / 2), Rotation.IDENTITY, WHITE_COLOR, new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
 
-            text = new TextDrawer(new Vector3f(0, 0, 0), new Rotation(0, 0, 0, 1), new Color(255, 0, 0), NO_TEXTURE, 0.5f, "FPS: 0");
-            globalRender.load(text);
+            fpsText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 30, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "FPS: 0");
+            positionText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 55, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "Position: 0");
+            globalRender.load(fpsText);
+            globalRender.load(positionText);
 
             initGLContext();
             initLoop();
@@ -123,7 +125,9 @@ public class EngineWindow extends Constants {
                 globalRender.renderAll();
                 updateCamera();
 
-                text.setText("FPS:" + Math.round(getFps()));
+                fpsText.setText("FPS:" + Math.round(getFps()));
+                positionText.setText("Position:" + (Utils.roundNumber(camera.getPosition().x) + "," +
+                        Utils.roundNumber(camera.getPosition().y) + "," + Utils.roundNumber(camera.getPosition().z)));
 
                 Display.update();
                 Display.sync(FPS);

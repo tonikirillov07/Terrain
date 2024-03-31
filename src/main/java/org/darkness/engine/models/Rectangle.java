@@ -5,9 +5,15 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
+import java.io.File;
+
 public class Rectangle extends Model{
     public Rectangle(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
         super(position, rotation, color, texture, scale);
+    }
+
+    public Rectangle(Vector3f position, Rotation rotation, Color color, int texture, float scale, File[] stepSounds) {
+        super(position, rotation, color, texture, scale, stepSounds);
     }
 
     @Override
