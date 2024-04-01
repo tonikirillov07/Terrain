@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Color;
 import org.lwjgl.util.vector.Vector3f;
 
-import static org.darkness.Constants.FONT_TEXTURE_DEFAULT_PATH;
+import static org.darkness.engine.utils.textures.TexturesConstants.FONT_TEXTURE_DEFAULT_PATH;
 
 public class TextDrawer extends Model {
     private String text;
@@ -19,7 +19,7 @@ public class TextDrawer extends Model {
         super(position, rotation, color, texture, scale);
         this.text = text;
 
-        setDetectCollision(false);
+        initUIElementSettings();
         setTexture(TexturesUtil.createTextureId(FONT_TEXTURE_DEFAULT_PATH, TexturesUtil.NEAREST));
     }
 

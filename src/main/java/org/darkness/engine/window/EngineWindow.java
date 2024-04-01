@@ -15,6 +15,7 @@ import org.darkness.ui.hud.Target;
 import org.darkness.ui.text.TextDrawer;
 import org.darkness.world.Fog;
 import org.darkness.world.Lighting;
+import org.darkness.world.Map;
 import org.darkness.world.Sun;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -59,22 +60,13 @@ public class EngineWindow extends Constants {
             sun = new Sun(camera, lighting);
             lighting.init();
             new BackgroundSounds().start();
+            new Map(globalRender).init();
 
-            for (int i = 0; i < WORLD_SIZE[0]; i++) {
-                for (int j = 0; j < WORLD_SIZE[1]; j++) {
-                    int randomTexture = new Random().nextInt(1, 4);
-                    int currentTexture =  randomTexture == 1 ? TexturesConstants.DIRT_TEXTURE : randomTexture == 2 ? TexturesConstants.STONE_TEXTURE: TexturesConstants.GRASS_TEXTURE;
+            float halfWindowWidth = (float) getWindowWidth() / 2;
+            float halfWindowHeight = (float) getWindowHeight() / 2;
 
-                    globalRender.load(new Rectangle(new Vector3f(i, 0, j), new Rotation(-90f, 1, 0, 0), WHITE_COLOR, currentTexture, 1f, randomTexture != 2 ? SoundsConstants.GROUND_SOUNDS: SoundsConstants.STONE_SOUNDS));
-
-                }
-            }
-
-            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 3, 2 , (float) WORLD_SIZE[1] / 3), Rotation.IDENTITY, WHITE_COLOR, new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
-            globalRender.load(new Cube(new Vector3f((float) WORLD_SIZE[0] / 2, 2 , (float) WORLD_SIZE[1] / 2), Rotation.IDENTITY, WHITE_COLOR, new Random().nextInt(1, 3) == 1 ? TexturesConstants.DIRT_TEXTURE : TexturesConstants.GRASS_TEXTURE, 1f));
-
-            fpsText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 30, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "FPS: 0");
-            positionText = new TextDrawer(new Vector3f(-((float) Display.getWidth() / 2) + 30, ((float) Display.getHeight() / 2) - 55, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "Position: 0");
+            fpsText = new TextDrawer(new Vector3f(-halfWindowWidth + 30, halfWindowHeight - 30, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "FPS: 0");
+            positionText = new TextDrawer(new Vector3f(-halfWindowWidth + 30, halfWindowHeight - 55, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "Position: 0");
             target = new Target(new Vector3f(0,0,-2), Rotation.IDENTITY, WHITE_COLOR, NO_TEXTURE, 16);
             globalRender.load(fpsText);
             globalRender.load(positionText);
@@ -149,15 +141,15 @@ public class EngineWindow extends Constants {
     }
 
     private void keepCursorInCenter(){
-        Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+        Mouse.setCursorPosition(getWindowWidth() / 2, getWindowHeight() / 2);
     }
 
     private void updateCamera() {
-        camera.control(deltaTime);
-        camera.update();
-
         camera.checkIsOnGround(globalRender.getModelList());
         camera.applyGravity();
+
+        camera.control(deltaTime);
+        camera.update();
 
         if(camera.getPosition().y >= 22) camera.setPosition(Camera.getRandomPosition(WORLD_SIZE[0], WORLD_SIZE[1]));
     }
@@ -208,5 +200,13 @@ public class EngineWindow extends Constants {
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
+    }
+
+    public int getWindowWidth(){
+        return Display.getWidth();
+    }
+
+    public int getWindowHeight(){
+        return Display.getHeight();
     }
 }

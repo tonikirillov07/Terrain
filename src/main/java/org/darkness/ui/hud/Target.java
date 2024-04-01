@@ -11,7 +11,7 @@ public class Target extends Model {
     public Target(Vector3f position, Rotation rotation, Color color, int texture, float scale) {
         super(position, rotation, color, texture, scale);
 
-        setDetectCollision(false);
+        initUIElementSettings();
         setTexture(TexturesConstants.TARGET_TEXTURE);
     }
 

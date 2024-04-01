@@ -20,8 +20,7 @@ import org.lwjgl.util.vector.Vector3f;
 import java.util.List;
 import java.util.Random;
 
-import static org.darkness.Constants.ACCELERATION_OF_GRAVITY;
-import static org.darkness.Constants.FOV_Y;
+import static org.darkness.Constants.*;
 
 public class Camera {
     private final Vector3f position, startPosition, rotation;
@@ -85,7 +84,7 @@ public class Camera {
         try {
             GL11.glMatrixMode(GL11.GL_PROJECTION);
             GL11.glLoadIdentity();
-            GLU.gluPerspective(FOV_Y, (float) Display.getWidth() / Display.getHeight(), 0.05f, Constants.Z_FAR);
+            GLU.gluPerspective(FOV_Y, (float) Display.getWidth() / Display.getHeight(), Z_NEAR, Z_FAR);
 
             GL11.glRotatef(rotationX.angle(), 1, 0, 0);
             GL11.glRotatef(rotationY.angle(), 0, 1, 0);

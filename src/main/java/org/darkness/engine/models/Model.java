@@ -14,6 +14,9 @@ import org.lwjgl.util.vector.Vector3f;
 
 import java.io.File;
 
+import static org.darkness.Constants.Z_FAR;
+import static org.darkness.Constants.Z_NEAR;
+
 public abstract class Model{
     private Vector3f position;
     private Rotation rotation;
@@ -175,13 +178,22 @@ public abstract class Model{
     protected void renderUIElement(@NotNull IOnAction onAction){
         bindTexture();
 
+        double halfWidth = (double) Display.getWidth() / 2;
+        double halfHeight = (double) Display.getHeight() / 2;
+
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
-        GL11.glOrtho((double) -Display.getWidth() / 2, (double) Display.getWidth() / 2, (double) -Display.getHeight() / 2, (double) Display.getHeight() / 2, 0.05f, Constants.Z_FAR);
+        GL11.glOrtho(-halfWidth, halfWidth, -halfHeight, halfHeight, Z_NEAR, Z_FAR);
 
         onAction.onAction();
 
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
+    }
+
+    protected void initUIElementSettings(){
+        setDetectCollision(false);
+
+        if(position.getZ() >= 0) position.setZ(-2f);
     }
 
     @Override
