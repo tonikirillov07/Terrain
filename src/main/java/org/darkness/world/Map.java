@@ -1,5 +1,6 @@
 package org.darkness.world;
 
+import lombok.AllArgsConstructor;
 import org.darkness.engine.GlobalRender;
 import org.darkness.engine.models.Cube;
 import org.darkness.engine.sounds.SoundsConstants;
@@ -12,12 +13,9 @@ import java.util.Random;
 import static org.darkness.Constants.WHITE_COLOR;
 import static org.darkness.Constants.WORLD_SIZE;
 
+@AllArgsConstructor
 public class Map {
     private final GlobalRender globalRender;
-
-    public Map(GlobalRender globalRender) {
-        this.globalRender = globalRender;
-    }
 
     public void init(){
         for (int i = 0; i < WORLD_SIZE[0]; i++) {

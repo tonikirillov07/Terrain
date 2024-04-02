@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
-import java.io.FileInputStream;
 import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.GL_LINEAR;

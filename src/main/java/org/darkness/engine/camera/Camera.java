@@ -1,5 +1,6 @@
 package org.darkness.engine.camera;
 
+import lombok.Getter;
 import org.darkness.Constants;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Cube;
@@ -23,13 +24,15 @@ import java.util.Random;
 import static org.darkness.Constants.*;
 
 public class Camera {
+    @Getter
     private final Vector3f position, startPosition, rotation;
+    @Getter
     private Rotation rotationX, rotationY;
     private float angleX, angleY;
     private boolean isMoving = false;
     private final Footsteps footsteps;
     private float deltaTime = 0, currentSpeed = 0;
-    private boolean isOnGround, hasCollisionWithBlock, doGravity = true;
+    private boolean isOnGround, doGravity = true;
     private Model standingModel;
     private final List<Model> allModels;
 
@@ -125,8 +128,6 @@ public class Camera {
             currentSpeed =  Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) ? Constants.DEFAULT_MOVE_SPEED * 2f: Constants.DEFAULT_MOVE_SPEED;
 
             if(isMoving){
-                checkForCollision(allModels, position);
-
                 if(moveType != Constants.MOVE_UP & moveType != Constants.MOVE_DOWN) playStepsSounds(deltaTime, currentSpeed);
             }
 
@@ -178,8 +179,8 @@ public class Camera {
             new Thread(() -> {
                 doGravity = false;
 
-                for (double i = 0f; i <= 1.8f; i+=0.1) {
-                    float y  = (float) (-Math.pow(i, 2) + Math.pow(i * 1.3f, 2) + 1);
+                for (double i = 0f; i <= 1.5d; i+=0.1) {
+                    float y  = (float) (-Math.pow(i, 2) + Math.pow(i + Math.PI / 2, 2));
 
                     translate(new Vector3f(0, -y * deltaTime, 0));
                     try {
@@ -189,8 +190,8 @@ public class Camera {
                     }
                 }
 
-                for (double i = 1.8f; i >= 0; i-=0.1) {
-                    float y  = (float) (-Math.pow(i, 2) + Math.pow(i * 1.3f, 2) + 1);
+                for (double i = 1.5d; i >= 0; i-=0.1) {
+                    float y  = (float) (-Math.pow(i, 2) + Math.pow(i + Math.PI / 2, 2));
 
                     translate(new Vector3f(0, -y * deltaTime, 0));
                     try {
@@ -306,14 +307,6 @@ public class Camera {
         }
     }
 
-    public void checkForCollision(@NotNull List<Model> modelList, Vector3f direction){
-        for (Model model : modelList) {
-            hasCollisionWithBlock = model.checkForAnotherCollision(direction);
-
-            if(hasCollisionWithBlock) break;
-        }
-    }
-
     public boolean isOnGround() {
         return isOnGround;
     }
@@ -328,19 +321,4 @@ public class Camera {
         position.translate(vector3f.x, vector3f.y, vector3f.z);
     }
 
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public Rotation getRotationX() {
-        return rotationX;
-    }
-
-    public Rotation getRotationY() {
-        return rotationY;
-    }
-
-    public Vector3f getRotation() {
-        return rotation;
-    }
 }

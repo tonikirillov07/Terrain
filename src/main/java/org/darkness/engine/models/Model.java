@@ -1,5 +1,7 @@
 package org.darkness.engine.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.darkness.Constants;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
@@ -17,13 +19,21 @@ import java.io.File;
 import static org.darkness.Constants.Z_FAR;
 import static org.darkness.Constants.Z_NEAR;
 
+@Getter
 public abstract class Model{
+    @Setter
     private Vector3f position;
+    @Setter
     private Rotation rotation;
+    @Setter
     private Color color;
+    @Setter
     private int texture;
+    @Setter
     private float scale;
+    @Setter
     private long id;
+    @Setter
     private boolean detectCollision = true;
     private File[] stepSounds;
 
@@ -44,26 +54,6 @@ public abstract class Model{
         this.stepSounds = stepSounds;
     }
 
-    public float getScale() {
-        return scale;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public Rotation getRotation() {
-        return rotation;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public int getTexture() {
-        return texture;
-    }
-
     public void applyColor(){
         try{
             GL11.glColor3f((float) getColor().getRed() / 100, (float) getColor().getGreen() / 100, (float) getColor().getBlue() / 100);
@@ -72,44 +62,8 @@ public abstract class Model{
         }
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setPosition(Vector3f position) {
-        this.position = position;
-    }
-
-    public void setRotation(Rotation rotation) {
-        this.rotation = rotation;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    public void setTexture(int texture) {
-        this.texture = texture;
-    }
-
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
     public void bindTexture(){
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, getTexture());
-    }
-
-    public boolean isDetectCollision() {
-        return detectCollision;
-    }
-
-    public void setDetectCollision(boolean detectCollision) {
-        this.detectCollision = detectCollision;
     }
 
     public void applyTransform(){
@@ -128,41 +82,41 @@ public abstract class Model{
         setRotation(Rotation.IDENTITY);
     }
 
-    public File[] getStepSounds() {
-        return stepSounds;
-    }
+    public boolean checkForPlayerStandingOnModel(@NotNull Camera camera) {
+        if (isDetectCollision()) {
+            float x1 = -getPosition().getX();
+            float z1 = -getPosition().getZ();
+            float y1 = -getPosition().getY();
 
-    public boolean checkForPlayerStandingOnModel(@NotNull Camera camera){
-        float x1 = -getPosition().getX();
-        float z1 = -getPosition().getZ();
-        float y1 = -getPosition().getY();
+            float x2 = x1 - scale;
+            float z2 = z1 - scale;
+            float y2 = y1 - scale;
 
-        float x2 = x1 - scale;
-        float z2 = z1 - scale;
-        float y2 = y1 - scale;
+            float playerY = camera.getPosition().y - Constants.PLAYER_HEIGHT;
 
-        float playerY = camera.getPosition().y - Constants.PLAYER_HEIGHT;
-
-        return ((camera.getPosition().x <= x1 & camera.getPosition().x >= x2) & (camera.getPosition().z <= z1 & camera.getPosition().z >= z2) & (playerY <= y1 & playerY >= y2))
-                & isDetectCollision();
+            return ((camera.getPosition().x <= x1 & camera.getPosition().x >= x2) & (camera.getPosition().z <= z1 & camera.getPosition().z >= z2) & (playerY <= y1 & playerY >= y2));
+        }
+        return false;
     }
 
     public boolean checkForAnotherCollision(@NotNull Vector3f cameraPosition){
-        float x1 = -getPosition().getX();
-        float z1 = -getPosition().getZ();
-        float y1 = -getPosition().getY();
+        if(isDetectCollision()) {
+            float x1 = -getPosition().getX();
+            float z1 = -getPosition().getZ();
+            float y1 = -getPosition().getY();
 
-        float halfScale = scale / 2;
+            float halfScale = scale / 2;
 
-        float x2 = (x1 - scale) - halfScale;
-        float z2 = (z1 - scale) - halfScale;
-        float y2 = (y1 - scale) - halfScale;
+            float x2 = (x1 - scale) - halfScale;
+            float z2 = (z1 - scale) - halfScale;
+            float y2 = (y1 - scale) - halfScale;
 
-        float playerY = cameraPosition.y - Constants.PLAYER_HEIGHT;
-        boolean isCollisionFound = (((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) |
-                (cameraPosition.x - halfScale <= x1 & cameraPosition.x - halfScale >= x2) & (cameraPosition.z - halfScale <= z1 & cameraPosition.z >= z2)) & ((playerY >= y1) & ((playerY > y2 & cameraPosition.y < y2) | (cameraPosition.y <= y1 & cameraPosition.y >= y2))));
+            float playerY = cameraPosition.y - Constants.PLAYER_HEIGHT;
 
-        return isCollisionFound & isDetectCollision();
+            return (((cameraPosition.x <= x1 & cameraPosition.x >= x2) & (cameraPosition.z <= z1 & cameraPosition.z >= z2) |
+                    (cameraPosition.x - halfScale <= x1 & cameraPosition.x - halfScale >= x2) & (cameraPosition.z - halfScale <= z1 & cameraPosition.z >= z2)) & ((playerY >= y1) & ((playerY > y2 & cameraPosition.y < y2) | (cameraPosition.y <= y1 & cameraPosition.y >= y2))));
+        }
+        return false;
     }
 
     public void render(){

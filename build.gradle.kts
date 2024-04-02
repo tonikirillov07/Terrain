@@ -13,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.projectlombok:lombok:1.18.32")
+    annotationProcessor("org.projectlombok:lombok:1.18.32")
+
     implementation("org.jetbrains:annotations:24.1.0")
     implementation(files(slickPath + "slick-util.jar", slickPath + "slick2d-core-1.0.2.jar", slickPath + "jogg-0.0.7.jar", slickPath + "jorbis-0.0.15.jar"))
     implementation(files(lwjglJarsPath + "AppleJavaExtensions.jar", lwjglJarsPath + "asm-debug-all.jar", lwjglJarsPath + "jinput.jar",

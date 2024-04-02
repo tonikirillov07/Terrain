@@ -11,6 +11,7 @@ public abstract class Constants {
     public static final short FPS = 60;
     public static final String TITLE = "Game";
     public static final int[] WORLD_SIZE = {40, 40};
+    public static final boolean IS_LIMIT_FPS = true;
     public static final boolean IS_VSYNC_ENABLED = true;
     public static final boolean IS_RESIZABLE_ENABLED = true;
     public static final Color SKY_COLOR = new Color(52, 80, 92);

@@ -1,15 +1,12 @@
 package org.darkness.engine.window;
 
+import lombok.Getter;
 import org.darkness.Constants;
 import org.darkness.engine.GlobalRender;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
-import org.darkness.engine.models.Cube;
-import org.darkness.engine.models.Rectangle;
-import org.darkness.engine.sounds.SoundsConstants;
 import org.darkness.engine.sounds.ambience.BackgroundSounds;
 import org.darkness.engine.utils.Utils;
-import org.darkness.engine.utils.textures.TexturesConstants;
 import org.darkness.engine.utils.transform.Rotation;
 import org.darkness.ui.hud.Target;
 import org.darkness.ui.text.TextDrawer;
@@ -26,18 +23,15 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.vector.Vector3f;
 
-import java.util.Random;
-
 import static org.darkness.engine.utils.textures.TexturesUtil.NO_TEXTURE;
 
 public class EngineWindow extends Constants {
-    private float fps;
-    private float deltaTime;
+    @Getter
+    private float fps, deltaTime;
     private GlobalRender globalRender;
     private Camera camera;
     private TextDrawer fpsText, positionText;
     private Lighting lighting;
-    private Target target;
     private Sun sun;
 
     public void create() {
@@ -55,7 +49,6 @@ public class EngineWindow extends Constants {
 
             globalRender = new GlobalRender();
             camera = new Camera(Camera.getRandomPosition(WORLD_SIZE[0], WORLD_SIZE[1]), new Vector3f(0, 0, 0), globalRender.getModelList());
-            Fog fog = new Fog();
             lighting = new Lighting();
             sun = new Sun(camera, lighting);
             lighting.init();
@@ -67,7 +60,7 @@ public class EngineWindow extends Constants {
 
             fpsText = new TextDrawer(new Vector3f(-halfWindowWidth + 30, halfWindowHeight - 30, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "FPS: 0");
             positionText = new TextDrawer(new Vector3f(-halfWindowWidth + 30, halfWindowHeight - 55, -2), new Rotation(-90f, 0, 0, 1), WHITE_COLOR, NO_TEXTURE, 16f, "Position: 0");
-            target = new Target(new Vector3f(0,0,-2), Rotation.IDENTITY, WHITE_COLOR, NO_TEXTURE, 16);
+            Target target = new Target(new Vector3f(0, 0, -2), Rotation.IDENTITY, WHITE_COLOR, NO_TEXTURE, 16);
             globalRender.load(fpsText);
             globalRender.load(positionText);
             globalRender.load(target);
@@ -110,7 +103,7 @@ public class EngineWindow extends Constants {
 
                 listenEspecialInput();
                 listenWindowEvents();
-                if(Mouse.isGrabbed()) keepCursorInCenter();
+                keepCursorInCenter();
 
                 lighting.doDayNightCycle(deltaTime);
 
@@ -126,7 +119,9 @@ public class EngineWindow extends Constants {
                         Utils.roundNumber(camera.getPosition().y) + "," + Utils.roundNumber(camera.getPosition().z)));
 
                 Display.update();
-                Display.sync(FPS);
+
+                if(IS_LIMIT_FPS)
+                    Display.sync(FPS);
 
                 deltaTime = (System.nanoTime() - startTime) / 1_000_000_000f;
                 fps = 1 / deltaTime;
@@ -141,7 +136,7 @@ public class EngineWindow extends Constants {
     }
 
     private void keepCursorInCenter(){
-        Mouse.setCursorPosition(getWindowWidth() / 2, getWindowHeight() / 2);
+        if(Mouse.isGrabbed()) Mouse.setCursorPosition(getWindowWidth() / 2, getWindowHeight() / 2);
     }
 
     private void updateCamera() {
@@ -179,14 +174,6 @@ public class EngineWindow extends Constants {
         }catch (Exception e) {
             Logs.makeErrorLog(e);
         }
-    }
-
-    public float getFps() {
-        return fps;
-    }
-
-    public float getDeltaTime() {
-        return deltaTime;
     }
 
     private void resizeWindow(int width, int height){

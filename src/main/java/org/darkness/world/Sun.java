@@ -1,18 +1,15 @@
 package org.darkness.world;
 
+import lombok.AllArgsConstructor;
 import org.darkness.engine.camera.Camera;
 import org.darkness.engine.logs.Logs;
 import org.lwjgl.opengl.GL11;
 
+@AllArgsConstructor
 public class Sun {
     private final Camera camera;
     private final Lighting lighting;
     private static final float SUN_SCALE = 7f;
-
-    public Sun(Camera camera, Lighting lighting) {
-        this.camera = camera;
-        this.lighting = lighting;
-    }
 
     public void update() {
         try {

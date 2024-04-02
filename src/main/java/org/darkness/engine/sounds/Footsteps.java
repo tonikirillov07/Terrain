@@ -4,7 +4,6 @@ import org.darkness.engine.logs.Logs;
 import org.newdawn.slick.Sound;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Random;
 
 public class Footsteps {

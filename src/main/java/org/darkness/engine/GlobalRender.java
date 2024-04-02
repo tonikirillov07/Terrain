@@ -1,11 +1,13 @@
 package org.darkness.engine;
 
+import lombok.Getter;
 import org.darkness.engine.logs.Logs;
 import org.darkness.engine.models.Model;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class GlobalRender {
     private final List<Model> modelList = new ArrayList<>();
 
@@ -18,10 +20,6 @@ public class GlobalRender {
 
     public void renderAll(){
         modelList.forEach(Model::render);
-    }
-
-    public List<Model> getModelList() {
-        return modelList;
     }
 
     public void clear(){
